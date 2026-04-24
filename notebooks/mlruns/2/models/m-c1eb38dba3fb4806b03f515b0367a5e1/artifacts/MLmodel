@@ -1,0 +1,23 @@
+artifact_path: file:f:/churn-prediction-pipeline/notebooks/mlruns/2/models/m-c1eb38dba3fb4806b03f515b0367a5e1/artifacts
+flavors:
+  python_function:
+    config:
+      device: null
+    data: data
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pytorch
+    pickle_module_name: mlflow.pytorch.pickle_module
+    python_version: 3.13.2
+  pytorch:
+    code: null
+    model_data: data
+    pytorch_version: 2.11.0+cpu
+mlflow_version: 3.10.1
+model_id: m-c1eb38dba3fb4806b03f515b0367a5e1
+model_size_bytes: 27929
+model_uuid: m-c1eb38dba3fb4806b03f515b0367a5e1
+prompts: null
+run_id: fa43ccd1914b4c589bea57282af3e8ff
+utc_time_created: '2026-04-24 02:30:58.605457'
