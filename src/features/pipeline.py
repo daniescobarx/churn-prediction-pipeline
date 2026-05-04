@@ -1,12 +1,9 @@
-"""Pipeline reprodutível de features para o dataset Telco Customer Churn.
+"""Pipeline reprodutível de features.
 
-Este módulo define o ``ColumnTransformer`` usado tanto no treino quanto no
-serviço de inferência, garantindo que a mesma transformação seja aplicada em
-todos os ambientes (zero divergência treino/produção).
-
-Convenções:
-    * Numéricas → ``StandardScaler``
-    * Categóricas → ``OneHotEncoder(handle_unknown='ignore')``
+Define o ``ColumnTransformer`` compartilhado entre treino e inferência:
+``StandardScaler`` nas numéricas e ``OneHotEncoder(handle_unknown='ignore')``
+nas categóricas. O artefato treinado é persistido em ``preprocessor.joblib``
+para garantir a mesma transformação em todos os ambientes.
 """
 
 from __future__ import annotations
@@ -54,12 +51,7 @@ TARGET_COL: str = "Churn"
 
 
 def build_preprocessor() -> ColumnTransformer:
-    """Constrói o ``ColumnTransformer`` reaproveitável para o dataset Telco.
-
-    Returns:
-        ColumnTransformer não treinado com escaladores numéricos e one-hot
-        encoder para categóricas.
-    """
+    """Retorna um ``ColumnTransformer`` não treinado."""
     return ColumnTransformer(
         transformers=[
             ("num", StandardScaler(), NUMERIC_COLS),
@@ -74,15 +66,7 @@ def build_preprocessor() -> ColumnTransformer:
 
 
 def prepare_features(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
-    """Separa o DataFrame limpo em features (X) e target (y).
-
-    Args:
-        df: DataFrame já passado por ``src.data.loader.clean``.
-
-    Returns:
-        Tupla (X, y) com as colunas de features na ordem canônica e o target
-        como inteiro 0/1.
-    """
+    """Separa o DataFrame limpo em ``(X, y)`` com colunas em ordem canônica."""
     missing = [c for c in FEATURE_COLS + [TARGET_COL] if c not in df.columns]
     if missing:
         raise KeyError(f"Colunas ausentes no DataFrame: {missing}")
@@ -94,14 +78,7 @@ def prepare_features(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
 
 
 def fit_preprocessor(X: pd.DataFrame) -> ColumnTransformer:
-    """Treina o ``ColumnTransformer`` no conjunto de treino.
-
-    Args:
-        X: features de treino (apenas — para evitar data leakage).
-
-    Returns:
-        ColumnTransformer ajustado.
-    """
+    """Ajusta o ``ColumnTransformer`` apenas no conjunto de treino."""
     preprocessor = build_preprocessor()
     preprocessor.fit(X)
     n_features = preprocessor.transform(X.head(1)).shape[1]
@@ -116,15 +93,7 @@ def fit_preprocessor(X: pd.DataFrame) -> ColumnTransformer:
 def export_preprocessor(
     preprocessor: ColumnTransformer, output_path: Path
 ) -> Path:
-    """Persiste o ``ColumnTransformer`` em um arquivo ``.joblib``.
-
-    Args:
-        preprocessor: pipeline já treinado.
-        output_path: caminho do arquivo de saída.
-
-    Returns:
-        O ``Path`` final onde o artefato foi escrito.
-    """
+    """Persiste o pipeline treinado em ``.joblib`` e retorna o caminho final."""
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(preprocessor, output_path)
@@ -135,18 +104,7 @@ def export_preprocessor(
 def train_and_export_pipeline(
     df: pd.DataFrame, output_path: Path
 ) -> tuple[ColumnTransformer, Path]:
-    """Treina o preprocessor a partir de um DataFrame e persiste em disco.
-
-    Útil para regenerar o artefato ``preprocessor.joblib`` a partir do dataset
-    bruto (após ``load_raw`` + ``clean``).
-
-    Args:
-        df: DataFrame limpo contendo todas as ``FEATURE_COLS`` e ``TARGET_COL``.
-        output_path: caminho do ``.joblib`` de saída.
-
-    Returns:
-        Tupla (preprocessor treinado, caminho final do artefato).
-    """
+    """Helper end-to-end: ``prepare_features`` → ``fit`` → ``export``."""
     X, _ = prepare_features(df)
     preprocessor = fit_preprocessor(X)
     path = export_preprocessor(preprocessor, output_path)

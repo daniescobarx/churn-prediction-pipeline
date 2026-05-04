@@ -1,4 +1,4 @@
-"""Logger estruturado reutilizável em todos os módulos do projeto."""
+"""Logger estruturado compartilhado entre módulos."""
 
 from __future__ import annotations
 
@@ -7,17 +7,7 @@ import sys
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Configura e retorna um logger estruturado.
-
-    Idempotente: chamadas subsequentes com o mesmo ``name`` reutilizam
-    o logger já configurado e não duplicam handlers.
-
-    Args:
-        name: nome do módulo chamador (tipicamente ``__name__``).
-
-    Returns:
-        Instância de :class:`logging.Logger` pronta para uso.
-    """
+    """Retorna um ``logging.Logger`` configurado e idempotente por ``name``."""
     logger = logging.getLogger(name)
     if logger.handlers:
         return logger

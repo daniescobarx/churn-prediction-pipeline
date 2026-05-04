@@ -120,7 +120,9 @@ requisição (também emitida via logger estruturado).
 - `SEED = 42` em todos os módulos (`torch`, `numpy`, `train_test_split`).
 - Pipeline de pré-processamento exportado em joblib — mesma transformação
   no treino e na inferência.
-- MLflow registra parâmetros, métricas, modelo e artefatos visuais.
+- `scripts/train_mlp.py` registra **parâmetros, métricas (val/test) e
+  artefatos** (`mlp.pt`, `preprocessor.joblib`, modelo PyTorch) no MLflow
+  no experimento `Telco_Churn_Etapa2`. Inspecione os runs com `make mlflow`.
 
 ## Testes
 

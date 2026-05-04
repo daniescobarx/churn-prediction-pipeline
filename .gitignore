@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.envrc
+
+# Caches de ferramentas
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Jupyter
+*.ipynb_checkpoints
+
+# MLflow
+mlruns/
+mlflow.db
+notebooks/mlruns/
+notebooks/mlflow.db
+
+# Artefatos de modelo (regerados via `make train`)
+models/*.pt
+models/*.joblib
+
+# Dados processados (regerados a partir de data/raw/)
+data/processed/*
+!data/processed/.gitkeep
+
+# Editores / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

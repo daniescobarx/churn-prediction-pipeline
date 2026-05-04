@@ -1,9 +1,9 @@
-"""Testes automatizados — Etapa 4 do Tech Challenge.
+"""Testes automatizados.
 
-Cobertura mínima exigida (≥ 3 testes passando):
-    1. Schema dos dados validado por **pandera**
-    2. Smoke test do **MLP PyTorch** (formato do tensor de saída)
-    3. Integração da **API FastAPI** via ``TestClient`` em ``/predict``
+Três blocos de cobertura:
+    1. Schema do contrato de entrada via **pandera**.
+    2. Smoke test do **MLP PyTorch** (forward pass + early stopping).
+    3. Integração da **API FastAPI** via ``TestClient``.
 """
 
 from __future__ import annotations

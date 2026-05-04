@@ -1,14 +1,11 @@
-"""API FastAPI para inferência do modelo de churn.
+"""API FastAPI de inferência.
 
-Endpoints:
-    * ``GET  /health``  — liveness check + status do modelo
-    * ``POST /predict`` — recebe features de um cliente e devolve probabilidade
+- ``GET  /health``  — liveness + flag ``model_loaded``
+- ``POST /predict`` — features do cliente → probabilidade + nível de risco
 
-Características de engenharia:
-    * Validação rigorosa via Pydantic (categorias permitidas + ranges)
-    * Logging estruturado em todos os pontos (sem ``print``)
-    * Middleware de latência: registra ``method``, ``path``, ``status`` e ``ms``
-    * ``ChurnInferenceService`` carregado uma única vez no startup
+Pydantic com ``extra="forbid"`` rejeita payloads desconhecidos com 422.
+O middleware de latência emite o header ``X-Process-Time-Ms`` e loga
+``method/path/status/latency_ms`` para cada requisição.
 """
 
 from __future__ import annotations
@@ -42,11 +39,8 @@ _state: dict[str, ChurnInferenceService | None] = {"service": None}
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    """Carrega o :class:`ChurnInferenceService` ao iniciar a API.
-
-    Em ausência dos artefatos, mantém o serviço em ``None`` e responde
-    ``503`` em ``/predict`` — útil em ambientes de teste sem modelo.
-    """
+    """Carrega o ``ChurnInferenceService`` no startup; sem artefatos
+    a API sobe em modo degradado e responde 503 em ``/predict``."""
     if _state.get("service") is None:
         if PREPROCESSOR_PATH.exists() and MODEL_PATH.exists():
             try:
@@ -87,7 +81,7 @@ async def latency_middleware(
     request: Request,
     call_next: Callable[[Request], Awaitable[Response]],
 ) -> Response:
-    """Mede e loga a latência de cada requisição HTTP."""
+    """Loga latência por requisição e expõe o header ``X-Process-Time-Ms``."""
     start = time.perf_counter()
     response = await call_next(request)
     elapsed_ms = (time.perf_counter() - start) * 1000
@@ -102,16 +96,8 @@ async def latency_middleware(
     return response
 
 
-# ---------------------------------------------------------------------------
-# Schemas Pydantic
-# ---------------------------------------------------------------------------
-
 class CustomerFeatures(BaseModel):
-    """Contrato de entrada do endpoint ``/predict``.
-
-    Cada campo replica fielmente os valores possíveis do dataset Telco.
-    Categorias inválidas e tipos errados disparam ``HTTP 422``.
-    """
+    """Contrato de entrada de ``/predict`` — categorias e ranges do dataset Telco."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -142,7 +128,7 @@ class CustomerFeatures(BaseModel):
 
 
 class PredictionResponse(BaseModel):
-    """Contrato de saída do endpoint ``/predict``."""
+    """Saída de ``/predict``."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -152,7 +138,7 @@ class PredictionResponse(BaseModel):
 
 
 class HealthResponse(BaseModel):
-    """Contrato do endpoint ``/health``."""
+    """Saída de ``/health``."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -160,13 +146,9 @@ class HealthResponse(BaseModel):
     model_loaded: bool
 
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
-
 @app.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
-    """Retorna o status da API e se o modelo está carregado em memória."""
+    """Liveness + status do modelo."""
     loaded = _state["service"] is not None
     return HealthResponse(
         status="ok" if loaded else "degraded",
@@ -175,7 +157,7 @@ async def health() -> HealthResponse:
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(customer: CustomerFeatures) -> PredictionResponse:
-    """Faz inferência de churn para um cliente."""
+    """Inferência de churn para um cliente."""
     service = _state["service"]
     if service is None:
         raise HTTPException(
