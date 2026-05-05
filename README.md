@@ -135,6 +135,7 @@ requisição (também emitida via logger estruturado).
 
 ## Documentação adicional
 
+- [`docs/ml_canvas.md`](docs/ml_canvas.md) — proposta de valor, stakeholders, métricas de negócio e SLOs.
 - [`docs/model_card.md`](docs/model_card.md) — performance, limitações e vieses.
 - [`docs/deployment.md`](docs/deployment.md) — arquitetura de deploy.
 - [`docs/monitoring.md`](docs/monitoring.md) — drift, alertas e retraining.
