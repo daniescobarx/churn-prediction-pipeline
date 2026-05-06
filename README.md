@@ -140,11 +140,13 @@ requisição (também emitida via logger estruturado).
 - [`docs/deployment.md`](docs/deployment.md) — arquitetura de deploy.
 - [`docs/monitoring.md`](docs/monitoring.md) — drift, alertas e retraining.
 
-## Etapas do Tech Challenge
+## Entregáveis do Tech Challenge
 
-| Etapa | Onde olhar |
-|---|---|
-| 1 — EDA + baselines | `notebooks/01_eda_and_baselines.ipynb`, `src/models/baseline.py` |
-| 2 — MLP PyTorch + ensemble | `notebooks/02_pytorch_mlp.ipynb`, `src/models/mlp.py` |
-| 3 — Pipeline + API + Testes | `src/features/pipeline.py`, `src/api/main.py`, `tests/test_churn.py` |
-| 4 — Documentação + monitoramento | `docs/*.md` |
+Para facilitar a navegação e avaliação do projeto, os requisitos foram divididos conforme a tabela abaixo:
+
+| Fases do Projeto | Descrição da Entrega | Onde Encontrar |
+|---|---|---|
+| **1. Exploração e Baselines** | Análise exploratória de dados (EDA), limpeza e criação de modelos base de machine learning. | `notebooks/01_eda_and_baselines.ipynb`, `src/models/baseline.py` |
+| **2. Modelagem Avançada** | Implementação de arquitetura Multilayer Perceptron (MLP) utilizando PyTorch. | `notebooks/02_pytorch_mlp.ipynb`, `src/models/mlp.py` |
+| **3. Engenharia e Deploy** | Pipeline de dados reprodutível, API RESTful com FastAPI e suíte de testes automatizados. | `src/features/pipeline.py`, `src/api/main.py`, `tests/test_churn.py` |
+| **4. Governança e MLOps** | Documentação de deploy, análise de vieses, model card e estratégias de monitoramento. | Diretório `docs/` |
